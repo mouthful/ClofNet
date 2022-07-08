@@ -1,0 +1,4 @@
+## Description
+
+* This task is inspired by (Kipf et al., 2018; Fuchs et al., 2020; Satorras et al., 2021b), where a 5-body charged system is controlled by the electrostatic force field. Note that the force direction between any two particles is always along the radial direction in the original setting. To validate the effectiveness of ClofNet on modeling arbitrary force directions, we also impose two external force fields into the original system, a gravity field and a Lorentz-like dynamical force field, which can provide more complex and dynamical force directions.
+* The original source code for generating trajectories comes from [Kipf et al., 2018](https://github.com/ethanfetaya/NRI) and is modified by [EGNN](https://github.com/vgsatorras/egnn). We further extend the version of EGNN to three new settings, as described in Section 7.1 of our [paper](https://arxiv.org/abs/2110.14811). We sincerely thank the solid contribution of these two works. 
