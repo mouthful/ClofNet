@@ -215,7 +215,7 @@ def train(model, optimizer, epoch, loader, backprop=True):
             rows, cols = edges
             loc_dist = torch.sum((loc[rows] - loc[cols])**2, 1).unsqueeze(1)  # relative distances among locations
             edge_attr = torch.cat([edge_attr, loc_dist], 1).detach()  # concatenate all edge properties
-            loc_pred = model(nodes, loc.detach(), edges, vel, edge_attr)
+            loc_pred = model(nodes, loc.detach(), edges, vel, edge_attr, n_nodes)
         else:
             raise Exception("Wrong model")
 

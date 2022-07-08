@@ -80,9 +80,9 @@ class ClofNet(nn.Module):
         coff_feat = torch.cat([pesudo_angle, coff_i, coff_j], dim=-1)
         return coff_feat
 
-    def forward(self, h, x, edges, vel, edge_attr, node_attr=None):
+    def forward(self, h, x, edges, vel, edge_attr, node_attr=None, n_nodes=5):
         h = self.embedding_node(h)
-        x = x.reshape(-1, self.n_points, 3)
+        x = x.reshape(-1, n_nodes, 3)
         centroid = torch.mean(x, dim=1, keepdim=True)
         x_center = (x - centroid).reshape(-1, 3)
         coff_feat = self.scalarization(edges, x_center)
@@ -93,7 +93,7 @@ class ClofNet(nn.Module):
             h, x_center, _ = self._modules["gcl_%d" % i](
                 h, edges, x_center, vel, edge_attr=edge_feat, node_attr=node_attr)
 
-        x = x_center.reshape(-1, self.n_points, 3) + centroid
+        x = x_center.reshape(-1, n_nodes, 3) + centroid
         x = x.reshape(-1, 3)
         return x
 
@@ -182,7 +182,7 @@ class ClofNet_vel(nn.Module):
                              v_i.unsqueeze(-1)).squeeze(-1)  
         vel_j = torch.matmul(edge_basis,
                              v_j.unsqueeze(-1)).squeeze(-1)  
-
+        # Calculate angle information in local frames
         coff_mul = coff_i * coff_j  # [E, 3]
         coff_i_norm = coff_i.norm(dim=-1, keepdim=True)
         coff_j_norm = coff_j.norm(dim=-1, keepdim=True)
@@ -194,10 +194,9 @@ class ClofNet_vel(nn.Module):
                               dim=-1)  #[E, 14]
         return coff_feat
 
-    def forward(self, h, x, edges, vel, edge_attr, node_attr=None):
+    def forward(self, h, x, edges, vel, edge_attr, node_attr=None, n_nodes=5):
         h = self.embedding_node(h)
-        # [BN, 3]
-        x = x.reshape(-1, self.n_points, 3)
+        x = x.reshape(-1, n_nodes, 3)
         centroid = torch.mean(x, dim=1, keepdim=True)
         x_center = (x - centroid).reshape(-1, 3)
 
@@ -209,6 +208,6 @@ class ClofNet_vel(nn.Module):
             h, x_center, _ = self._modules["gcl_%d" % i](
                 h, edges, x_center, vel, edge_attr=edge_feat, node_attr=node_attr)
 
-        x = x_center.reshape(-1, self.n_points, 3) + centroid
+        x = x_center.reshape(-1, n_nodes, 3) + centroid
         x = x.reshape(-1, 3)
         return x
