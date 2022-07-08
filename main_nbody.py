@@ -1,7 +1,9 @@
 import argparse
 import torch
 from newtonian.dataset_nbody import NBodyDataset
-from newtonian.model import GNN, EGNN, EGNN_vel, RF_vel, EVFN, EVFN_norm, EVFN_modular, EVFN_vel
+from newtonian.gnn import GNN, RF_vel
+from newtonian.egnn import EGNN, EGNN_vel
+from newtonian.clof import ClofNet, ClofNet_vel
 import os
 from torch import nn, optim
 import json
@@ -110,7 +112,7 @@ def main():
                                  max_samples=args.max_training_samples, data_root=data_root, data_mode=args.data_mode)
     loader_train = torch.utils.data.DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, drop_last=True)
 
-    dataset_val = NBodyDataset(partition='val', dataset_name="nbody_small", data_root=data_root, data_mode=args.data_mode)
+    dataset_val = NBodyDataset(partition='valid', dataset_name="nbody_small", data_root=data_root, data_mode=args.data_mode)
     loader_val = torch.utils.data.DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False, drop_last=False)
 
     dataset_test = NBodyDataset(partition='test', dataset_name="nbody_small", data_root=data_root, data_mode=args.data_mode)
@@ -125,14 +127,10 @@ def main():
         model = EGNN_vel(in_node_nf=1, in_edge_nf=2, hidden_nf=args.nf, device=device, n_layers=args.n_layers, recurrent=True, norm_diff=args.norm_diff, tanh=args.tanh)
     elif args.model == 'rf_vel':
         model = RF_vel(hidden_nf=args.nf, edge_attr_nf=2, device=device, act_fn=nn.SiLU(), n_layers=args.n_layers)
-    elif args.model == 'evfn':
-        model = EVFN(in_node_nf=1, in_edge_nf=2, hidden_nf=args.nf, n_layers=args.n_layers, device=device, recurrent=True, norm_diff=args.norm_diff, tanh=args.tanh, n_points=args.n_points)
-    elif args.model == 'evfn_norm':
-        model = EVFN_norm(in_node_nf=1, in_edge_nf=2, hidden_nf=args.nf, n_layers=args.n_layers, device=device, recurrent=True, norm_diff=args.norm_diff, tanh=args.tanh, n_points=args.n_points)
-    elif args.model == 'evfn_vel':
-        model = EVFN_vel(in_node_nf=1, in_edge_nf=2, hidden_nf=args.nf, n_layers=args.n_layers, device=device, recurrent=True, norm_diff=args.norm_diff, tanh=args.tanh, n_points=args.n_points)
-    elif args.model == 'evfn_modular':
-        model = EVFN_modular(in_node_nf=1, in_edge_nf=2, hidden_nf=args.nf, n_layers=args.n_layers, device=device, recurrent=True, norm_diff=args.norm_diff, tanh=args.tanh, n_points=args.n_points)
+    elif args.model == 'clof':
+        model = ClofNet(in_node_nf=1, in_edge_nf=2, hidden_nf=args.nf, n_layers=args.n_layers, device=device, recurrent=True, norm_diff=args.norm_diff, tanh=args.tanh, n_points=args.n_points)
+    elif args.model == 'clof_vel':
+        model = ClofNet_vel(in_node_nf=1, in_edge_nf=2, hidden_nf=args.nf, n_layers=args.n_layers, device=device, recurrent=True, norm_diff=args.norm_diff, tanh=args.tanh, n_points=args.n_points)
     else:
         raise Exception("Wrong model specified")
 
@@ -203,7 +201,6 @@ def train(model, optimizer, epoch, loader, backprop=True):
             loc_dist = torch.sum((loc[rows] - loc[cols])**2, 1).unsqueeze(1)  # relative distances among locations
             vel_attr = get_velocity_attr(loc, vel, rows, cols).detach()
             edge_attr = torch.cat([edge_attr, loc_dist, vel_attr], 1).detach()  # concatenate all edge properties
-
             loc_pred = model(nodes, loc.detach(), edges, edge_attr)
         elif args.model == 'egnn_vel':
             nodes = torch.sqrt(torch.sum(vel ** 2, dim=1)).unsqueeze(1).detach()
@@ -217,7 +214,7 @@ def train(model, optimizer, epoch, loader, backprop=True):
             loc_dist = torch.sum((loc[rows] - loc[cols]) ** 2, 1).unsqueeze(1)
             edge_attr = torch.cat([edge_attr, loc_dist], 1).detach()
             loc_pred = model(vel_norm, loc.detach(), edges, vel, edge_attr)
-        elif args.model in ['evfn', 'evfn_naive', 'evfn_raw_basis', 'evfn_1basis', 'evfn_nbasis', 'evfn_norm', 'evfn_modular', 'evfn_vel']:
+        elif args.model in ['clof', 'clof_vel']:
             nodes = torch.sqrt(torch.sum(vel ** 2, dim=1)).unsqueeze(1).detach()
             rows, cols = edges
             loc_dist = torch.sum((loc[rows] - loc[cols])**2, 1).unsqueeze(1)  # relative distances among locations
@@ -260,8 +257,8 @@ def train(model, optimizer, epoch, loader, backprop=True):
 
 
 def main_sweep():
-    training_samples = [100, 200, 400, 800, 1600, 3200, 6400, 12800, 25000, 50000]
-    n_epochs = [200, 200, 200, 200, 200, 500, 500, 600, 600, 600]
+    training_samples = [200, 400, 800, 1600, 3200, 6400, 12800, 25000, 50000]
+    n_epochs = [200, 200, 200, 200, 500, 500, 600, 600, 600]
 
     if args.sweep_training == 2:
         training_samples = training_samples[0:5]

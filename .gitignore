@@ -164,7 +164,7 @@ eval.py
 graph.py
 main_nbody_v.py
 losess.py
-LICENSE
+# LICENSE
 n_body_system/dataset/upload_azure.sh
 cp_dir.py
 
@@ -173,3 +173,4 @@ newtonian/legacy
 
 results
 utils.py
+get_best_results.py

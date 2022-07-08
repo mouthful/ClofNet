@@ -5,39 +5,31 @@ import os
 
 class NBodyDataset():
     """
-    NBodyDataset
-
+    NBodyDataset:
+    {
+        small: ES
+        static: G+ES
+        dynamic: L+ES
+    }
     """
-    def __init__(self, partition='train', max_samples=1e8, dataset_name="se3_transformer", data_root=None, data_mode='small'):
-        self.partition = partition
-        if self.partition == 'val':
-            self.sufix = 'valid'
+    def __init__(self, partition='train', max_samples=1e8, data_root=None, data_mode='small'):
+        self.sufix = partition
+        if data_mode == 'small':
+            self.sufix += "_charged5_initvel1small"
+        elif (data_mode == 'static') or (data_mode == 'dynamic'):
+            self.sufix += f"_{data_mode}5_initvel1{data_mode}"
+        elif data_mode == "small_20body":
+            self.sufix += f"_charged20_initvel1{data_mode}"
         else:
-            self.sufix = self.partition
-        self.dataset_name = dataset_name
-        if dataset_name == "nbody":
-            self.sufix += "_charged5_initvel1"
-        elif dataset_name == "nbody_small" or dataset_name == "nbody_small_out_dist":
-            if data_mode == 'small':
-                self.sufix += "_charged5_initvel1small"
-            elif (data_mode == 'static') or (data_mode == 'dynamic'):
-                self.sufix += f"_{data_mode}5_initvel1{data_mode}"
-            elif data_mode == "small_20body":
-                self.sufix += f"_charged20_initvel1{data_mode}"
-            else:
-                self.sufix += f"_{data_mode[:-7]}20_initvel1{data_mode}"
-                # raise Exception("Wrong dataset mode %s" % data_mode)
-                
-        else:
-            raise Exception("Wrong dataset name %s" % self.dataset_name)
+            self.sufix += f"_{data_mode[:-7]}20_initvel1{data_mode}"
 
         self.data_root = data_root
         self.max_samples = int(max_samples)
-        self.dataset_name = dataset_name
         self.data, self.edges = self.load()
+        self.frame_0 = 30
+        self.frame_T = 40
 
     def load(self):
-        # print(self.data_root)
         loc = np.load(os.path.join(self.data_root, 'loc_' + self.sufix + '.npy'))
         vel = np.load(os.path.join(self.data_root, 'vel_' + self.sufix + '.npy'))
         edges = np.load(os.path.join(self.data_root, 'edges_' + self.sufix + '.npy'))
@@ -79,18 +71,7 @@ class NBodyDataset():
     def __getitem__(self, i):
         loc, vel, edge_attr, charges = self.data
         loc, vel, edge_attr, charges = loc[i], vel[i], edge_attr[i], charges[i]
-
-        if self.dataset_name == "nbody":
-            frame_0, frame_T = 6, 8
-        elif self.dataset_name == "nbody_small":
-            frame_0, frame_T = 30, 40
-        elif self.dataset_name == "nbody_small_out_dist":
-            frame_0, frame_T = 20, 30
-        else:
-            raise Exception("Wrong dataset partition %s" % self.dataset_name)
-
-
-        return loc[frame_0], vel[frame_0], edge_attr, charges, loc[frame_T]
+        return loc[self.frame_0], vel[self.frame_0], edge_attr, charges, loc[self.frame_T]
 
     def __len__(self):
         return len(self.data[0])
