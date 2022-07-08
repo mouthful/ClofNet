@@ -21,15 +21,25 @@ bash script.sh
 ```
 
 #### Run experiments
+* for the ES(5) setting, run
 ```
-python -u main_nbody.py --max_training_samples 3000 --norm_diff True --LR_decay True --lr 0.005 --outf saved/nbody --data_mode small_20body --decay 0.4 --epochs 600 --exp_name small_20body --model evfn_norm --n_layers 4 --n_points 20 --data_toot "/casp/v-hezha1/workspace/EquiNODE/correct_data"
+python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_decay True --lr 0.005 --outf saved/newtonian \
+--data_mode small --decay 0.2 --epochs 600 --exp_name clof_vel_small_2body --model clof_vel --n_layers 4 --data_toot <root_of_data>
 ```
-or
-
+* for the ES(20) setting, run
 ```
-bash evfn4nbody.sh <model> <data_mode> <LR> <decay> <epoch> <exp_name> <n_layer> <n_points> <max_samples>
-e.g.,
-bash evfn4nbody.sh evfn_norm small_20body 0.005 0.4 600 small_20body 4 20 3000
+python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_decay True --lr 0.005 --outf saved/newtonian \
+--data_mode small_20body --decay 0.2 --epochs 600 --exp_name clof_vel_small_2body --model clof_vel --n_layers 4 --data_toot <root_of_data>
+```
+* for the G+ES(20) setting, run
+```
+python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_decay True --lr 0.005 --outf saved/newtonian \
+--data_mode static_20body --decay 0.2 --epochs 600 --exp_name clof_vel_static_20body --model clof_vel --n_layers 4 --data_toot <root_of_data>
+```
+* for the L+ES(20) setting, run
+```
+python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_decay True --lr 0.005 --outf saved/newtonian \
+--data_mode dynamic_20body --decay 0.2 --epochs 600 --exp_name clof_vel_static_20body --model clof_vel --n_layers 4 --data_toot <root_of_data>
 ```
 
 ## Cite

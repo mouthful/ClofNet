@@ -1,14 +1,15 @@
-import argparse
-import torch
-from newtonian.dataset_nbody import NBodyDataset
-from newtonian.gnn import GNN, RF_vel
-from newtonian.egnn import EGNN, EGNN_vel
-from newtonian.clof import ClofNet, ClofNet_vel
 import os
-from torch import nn, optim
 import json
 import time
 import logging
+import argparse
+
+import torch
+from torch import nn, optim
+from newtonian.dataset4newton import NBodyDataset
+from newtonian.gnn import GNN, RF_vel
+from newtonian.egnn import EGNN, EGNN_vel
+from newtonian.clof import ClofNet, ClofNet_vel
 
 parser = argparse.ArgumentParser(description='VAE MNIST Example')
 parser.add_argument('--exp_name', type=str, default='exp_1', metavar='N', help='experiment_name')
@@ -16,8 +17,6 @@ parser.add_argument('--batch_size', type=int, default=100, metavar='N',
                     help='input batch size for training (default: 128)')
 parser.add_argument('--epochs', type=int, default=10000, metavar='N',
                     help='number of epochs to train (default: 10)')
-parser.add_argument('--n_points', type=int, default=5, metavar='N',
-                    help='size of system (default: 5)')
 parser.add_argument('--no-cuda', action='store_true', default=False,
                     help='enables CUDA training')
 parser.add_argument('--seed', type=int, default=1, metavar='S',
@@ -46,8 +45,6 @@ parser.add_argument('--degree', type=int, default=2, metavar='N',
                     help='degree of the TFN and SE3')
 parser.add_argument('--max_training_samples', type=int, default=3000, metavar='N',
                     help='maximum amount of training samples')
-parser.add_argument('--dataset', type=str, default="nbody_small", metavar='N',
-                    help='nbody_small, nbody')
 parser.add_argument('--sweep_training', type=int, default=0, metavar='N',
                     help='0 nor sweep, 1 sweep, 2 sweep small')
 parser.add_argument('--time_exp', type=int, default=0, metavar='N',
@@ -84,7 +81,6 @@ except OSError:
     pass
 
 # prepare data root and sace path for checkpoint
-parent_dir = os.path.abspath(os.path.dirname(os.getcwd()))
 data_root = os.path.join(args.data_root, args.data_mode)
 checkpoint_path = os.path.join(args.outf, args.exp_name, 'checkpoint')
 os.makedirs(checkpoint_path, exist_ok=True)
