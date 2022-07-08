@@ -43,7 +43,7 @@ python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_de
 ```
 
 ## Cite
-Please cite our papers if you use the model or this code in your own work:
+Please cite our paper if you use the model or this code in your own work:
 ```
 @inproceedings{weitao_clofnet_2021,
   title     = {{SE(3)} Equivariant Graph Neural Networks with Complete Local Frames},

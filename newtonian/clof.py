@@ -90,12 +90,8 @@ class ClofNet(nn.Module):
         edge_feat = self.fuse_edge(edge_feat)
 
         for i in range(0, self.n_layers):
-            h, x_center, _ = self._modules["gcl_%d" % i](h,
-                                                         edges,
-                                                         x_center,
-                                                         vel,
-                                                         edge_attr=edge_feat,
-                                                         node_attr=node_attr)
+            h, x_center, _ = self._modules["gcl_%d" % i](
+                h, edges, x_center, vel, edge_attr=edge_feat, node_attr=node_attr)
 
         x = x_center.reshape(-1, self.n_points, 3) + centroid
         x = x.reshape(-1, 3)
@@ -155,7 +151,7 @@ class ClofNet_vel(nn.Module):
         logging.info('Network Size {}'.format(params))
         return str(params)
 
-    def coord2radial(self, edge_index, coord):
+    def coord2localframe(self, edge_index, coord):
         row, col = edge_index
         coord_diff = coord[row] - coord[col]
         radial = torch.sum((coord_diff)**2, 1).unsqueeze(1)
@@ -166,35 +162,26 @@ class ClofNet_vel(nn.Module):
             cross_norm = (torch.sqrt(
                 torch.sum((coord_cross)**2, 1).unsqueeze(1))) + 1
             coord_cross = coord_cross / cross_norm
-
         coord_vertical = torch.cross(coord_diff, coord_cross)
-
-        return coord_diff, coord_cross, coord_vertical
+        return coord_diff.unsqueeze(1), coord_cross.unsqueeze(1), coord_vertical.unsqueeze(1)
 
     def scalarization(self, edges, x, vel):
-        coord_diff, coord_cross, coord_vertical = self.coord2radial(edges, x)
+        coord_diff, coord_cross, coord_vertical = self.coord2localframe(edges, x)
         # Geometric Vectors Scalarization
         row, col = edges
-        edge_basis = torch.cat(
-            [
-                coord_diff.unsqueeze(1),
-                coord_cross.unsqueeze(1),
-                coord_vertical.unsqueeze(1),
-            ],
-            dim=1,
-        )  # [B*N*(N-1), 3]
-        r_i = x[row]  # [B*N*(N-1), 3]
+        edge_basis = torch.cat([coord_diff, coord_cross, coord_vertical], dim=1) 
+        r_i = x[row] 
         r_j = x[col]
         v_i = vel[row]
         v_j = vel[col]
         coff_i = torch.matmul(edge_basis,
-                              r_i.unsqueeze(-1)).squeeze(-1)  # [B*N*(N-1), 3]
+                              r_i.unsqueeze(-1)).squeeze(-1)  
         coff_j = torch.matmul(edge_basis,
-                              r_j.unsqueeze(-1)).squeeze(-1)  # [B*N*(N-1), 3]
+                              r_j.unsqueeze(-1)).squeeze(-1)  
         vel_i = torch.matmul(edge_basis,
-                             v_i.unsqueeze(-1)).squeeze(-1)  # [B*N*(N-1), 3]
+                             v_i.unsqueeze(-1)).squeeze(-1)  
         vel_j = torch.matmul(edge_basis,
-                             v_j.unsqueeze(-1)).squeeze(-1)  # [B*N*(N-1), 3]
+                             v_j.unsqueeze(-1)).squeeze(-1)  
 
         coff_mul = coff_i * coff_j  # [E, 3]
         coff_i_norm = coff_i.norm(dim=-1, keepdim=True)
@@ -210,7 +197,6 @@ class ClofNet_vel(nn.Module):
     def forward(self, h, x, edges, vel, edge_attr, node_attr=None):
         h = self.embedding_node(h)
         # [BN, 3]
-        
         x = x.reshape(-1, self.n_points, 3)
         centroid = torch.mean(x, dim=1, keepdim=True)
         x_center = (x - centroid).reshape(-1, 3)
@@ -220,12 +206,8 @@ class ClofNet_vel(nn.Module):
         edge_feat = self.fuse_edge(edge_feat)
 
         for i in range(0, self.n_layers):
-            h, x_center, _ = self._modules["gcl_%d" % i](h,
-                                                         edges,
-                                                         x_center,
-                                                         vel,
-                                                         edge_attr=edge_feat,
-                                                         node_attr=node_attr)
+            h, x_center, _ = self._modules["gcl_%d" % i](
+                h, edges, x_center, vel, edge_attr=edge_feat, node_attr=node_attr)
 
         x = x_center.reshape(-1, self.n_points, 3) + centroid
         x = x.reshape(-1, 3)
