@@ -354,7 +354,7 @@ class Clof_GCL(E_GCL):
             act_fn)
         self.layer_norm = nn.LayerNorm(hidden_nf)
 
-    def coord2radial(self, edge_index, coord):
+    def coord2localframe(self, edge_index, coord):
         row, col = edge_index
         coord_diff = coord[row] - coord[col]
         radial = torch.sum((coord_diff)**2, 1).unsqueeze(1)
@@ -382,8 +382,8 @@ class Clof_GCL(E_GCL):
     def forward(self, h, edge_index, coord, vel, edge_attr=None, node_attr=None):
         row, col = edge_index
         residue = h
-        radial, coord_diff, coord_cross, coord_vertical = self.coord2radial(edge_index, coord)
-
+        # h = self.layer_norm(h)
+        radial, coord_diff, coord_cross, coord_vertical = self.coord2localframe(edge_index, coord)
         edge_feat = self.edge_model(h[row], h[col], radial, edge_attr)
         coord = self.coord_model(coord, edge_index, coord_diff, coord_cross, coord_vertical, edge_feat)
 

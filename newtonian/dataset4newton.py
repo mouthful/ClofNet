@@ -13,6 +13,7 @@ class NBodyDataset():
     }
     """
     def __init__(self, partition='train', max_samples=1e8, data_root=None, data_mode='small'):
+        self.partition = partition
         self.sufix = partition
         if data_mode == 'small':
             self.sufix += "_charged5_initvel1small"

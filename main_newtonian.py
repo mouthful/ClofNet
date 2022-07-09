@@ -9,11 +9,11 @@ from torch import nn, optim
 from newtonian.dataset4newton import NBodyDataset
 from newtonian.gnn import GNN, RF_vel
 from newtonian.egnn import EGNN, EGNN_vel
-from newtonian.clof import ClofNet, ClofNet_vel
+from newtonian.clof import ClofNet, ClofNet_vel, ClofNet_vel_gbf
 
 parser = argparse.ArgumentParser(description='VAE MNIST Example')
 parser.add_argument('--exp_name', type=str, default='exp_1', metavar='N', help='experiment_name')
-parser.add_argument('--batch_size', type=int, default=100, metavar='N',
+parser.add_argument('--batch_size', type=int, default=128, metavar='N',
                     help='input batch size for training (default: 128)')
 parser.add_argument('--epochs', type=int, default=10000, metavar='N',
                     help='number of epochs to train (default: 10)')
@@ -104,14 +104,13 @@ def main():
     logging.info(f'load data from {data_root}')
     logging.info(f'save checkpoints to {checkpoint_path}')
 
-    dataset_train = NBodyDataset(partition='train', dataset_name=args.dataset,
-                                 max_samples=args.max_training_samples, data_root=data_root, data_mode=args.data_mode)
+    dataset_train = NBodyDataset(partition='train', max_samples=args.max_training_samples, data_root=data_root, data_mode=args.data_mode)
     loader_train = torch.utils.data.DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, drop_last=True)
 
-    dataset_val = NBodyDataset(partition='valid', dataset_name="nbody_small", data_root=data_root, data_mode=args.data_mode)
+    dataset_val = NBodyDataset(partition='valid', data_root=data_root, data_mode=args.data_mode)
     loader_val = torch.utils.data.DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False, drop_last=False)
 
-    dataset_test = NBodyDataset(partition='test', dataset_name="nbody_small", data_root=data_root, data_mode=args.data_mode)
+    dataset_test = NBodyDataset(partition='test', data_root=data_root, data_mode=args.data_mode)
     loader_test = torch.utils.data.DataLoader(dataset_test, batch_size=args.batch_size, shuffle=False, drop_last=False)
 
 
@@ -124,16 +123,19 @@ def main():
     elif args.model == 'rf_vel':
         model = RF_vel(hidden_nf=args.nf, edge_attr_nf=2, device=device, act_fn=nn.SiLU(), n_layers=args.n_layers)
     elif args.model == 'clof':
-        model = ClofNet(in_node_nf=1, in_edge_nf=2, hidden_nf=args.nf, n_layers=args.n_layers, device=device, recurrent=True, norm_diff=args.norm_diff, tanh=args.tanh, n_points=args.n_points)
+        model = ClofNet(in_node_nf=1, in_edge_nf=2, hidden_nf=args.nf, n_layers=args.n_layers, device=device, recurrent=True, norm_diff=args.norm_diff, tanh=args.tanh)
     elif args.model == 'clof_vel':
-        model = ClofNet_vel(in_node_nf=1, in_edge_nf=2, hidden_nf=args.nf, n_layers=args.n_layers, device=device, recurrent=True, norm_diff=args.norm_diff, tanh=args.tanh, n_points=args.n_points)
+        model = ClofNet_vel(in_node_nf=1, in_edge_nf=2, hidden_nf=args.nf, n_layers=args.n_layers, device=device, recurrent=True, norm_diff=args.norm_diff, tanh=args.tanh)
+    elif args.model == 'clof_vel_gbf':
+        model = ClofNet_vel_gbf(in_node_nf=1, in_edge_nf=2, hidden_nf=args.nf, n_layers=args.n_layers, device=device, recurrent=True, norm_diff=args.norm_diff, tanh=args.tanh)
     else:
         raise Exception("Wrong model specified")
 
+    logging.info(args)
     print(model)
     logging.info(model)
     optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    step_size = int(args.epochs // 6)
+    step_size = int(args.epochs // 8)
     if args.LR_decay:
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size, gamma=args.decay, last_epoch=-1)
 
@@ -210,12 +212,12 @@ def train(model, optimizer, epoch, loader, backprop=True):
             loc_dist = torch.sum((loc[rows] - loc[cols]) ** 2, 1).unsqueeze(1)
             edge_attr = torch.cat([edge_attr, loc_dist], 1).detach()
             loc_pred = model(vel_norm, loc.detach(), edges, vel, edge_attr)
-        elif args.model in ['clof', 'clof_vel']:
+        elif args.model in ['clof', 'clof_vel', 'clof_vel_gbf']:
             nodes = torch.sqrt(torch.sum(vel ** 2, dim=1)).unsqueeze(1).detach()
             rows, cols = edges
             loc_dist = torch.sum((loc[rows] - loc[cols])**2, 1).unsqueeze(1)  # relative distances among locations
             edge_attr = torch.cat([edge_attr, loc_dist], 1).detach()  # concatenate all edge properties
-            loc_pred = model(nodes, loc.detach(), edges, vel, edge_attr, n_nodes)
+            loc_pred = model(nodes, loc.detach(), edges, vel, edge_attr, n_nodes=n_nodes)
         else:
             raise Exception("Wrong model")
 
