@@ -23,22 +23,22 @@ bash script.sh
 #### Run experiments
 * for the ES(5) setting, run
 ```
-python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_decay True --lr 0.01 --weight_decay 5e-4 --outf saved/newtonian \
---data_mode small --decay 0.6 --epochs 400 --exp_name clof_vel_small_5body --model clof_vel --n_layers 4 --data_root <root_of_data>
+python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_decay True --lr 0.01 --outf saved/newtonian \
+--data_mode small --decay 0.9 --epochs 400 --exp_name clof_vel_small_5body --model clof_vel --n_layers 4 --data_root <root_of_data>
 ```
 * for the ES(20) setting, run
 ```
-python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_decay True --lr 0.01 --weight_decay 5e-3 --outf saved/newtonian \
---data_mode small_20body --decay 0.6 --epochs 600 --exp_name clof_vel_small_20body --model clof_vel --n_layers 4 --data_root <root_of_data>
+python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_decay True --lr 0.01 --outf saved/newtonian \
+--data_mode small_20body --decay 0.9 --epochs 600 --exp_name clof_vel_small_20body --model clof_vel --n_layers 4 --data_root <root_of_data>
 ```
 * for the G+ES(20) setting, run
 ```
-python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_decay True --lr 0.01 --weight_decay 5e-4 --outf saved/newtonian \
---data_mode static_20body --decay 0.6 --epochs 600 --exp_name clof_vel_static_20body --model clof_vel --n_layers 4 --data_root <root_of_data>
+python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_decay True --lr 0.01 --outf saved/newtonian \
+--data_mode static_20body --decay 0.9 --epochs 200 --exp_name clof_vel_static_20body --model clof_vel --n_layers 4 --data_root <root_of_data>
 ```
 * for the L+ES(20) setting, run
 ```
-python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_decay True --decay 0.6 --lr 0.01 --weight_decay 5e-4 --outf saved/newtonian \
+python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_decay True --decay 0.9 --lr 0.01 --outf saved/newtonian \
 --data_mode dynamic_20body --epochs 600 --exp_name clof_vel_dynamic_20body --model clof_vel --n_layers 4 --data_root <root_of_data>
 ```
 

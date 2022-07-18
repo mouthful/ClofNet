@@ -152,7 +152,6 @@ qm9/lie_conv/data/*
 *cache/trans_Q/mutex*
 
 .vscode
-saved
 legacy
 run*.sh
 t*.sh
@@ -171,6 +170,19 @@ cp_dir.py
 test.py
 newtonian/legacy
 
-results
+
 utils.py
 get_best_results.py
+
+scripts
+
+*.yaml
+*submit_train.py
+
+results
+dataset
+saved
+.amltconfig
+.amltignore
+amlt
+query_logs.py

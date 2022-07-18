@@ -25,11 +25,11 @@ parser.add_argument('--log_interval', type=int, default=1, metavar='N',
                     help='how many batches to wait before logging training status')
 parser.add_argument('--test_interval', type=int, default=5, metavar='N',
                     help='how many epochs to wait before logging test')
-parser.add_argument('--outf', type=str, default='n_body_system/logs', metavar='N',
-                    help='folder to output vae')
+parser.add_argument('--outf', type=str, default='saved', metavar='N',
+                    help='folder to output')
 parser.add_argument('--data_mode', type=str, default='small', metavar='N',
                     help='folder to dataset')
-parser.add_argument('--data_root', type=str, default='newtonian/data', metavar='N',
+parser.add_argument('--data_root', type=str, default='dataset/clofnet_dataset', metavar='N',
                     help='folder to dataset root')
 parser.add_argument('--lr', type=float, default=5e-4, metavar='N',
                     help='learning rate')
@@ -80,7 +80,7 @@ try:
 except OSError:
     pass
 
-# prepare data root and sace path for checkpoint
+# prepare data root and save path for checkpoint
 data_root = os.path.join(args.data_root, args.data_mode)
 checkpoint_path = os.path.join(args.outf, args.exp_name, 'checkpoint')
 os.makedirs(checkpoint_path, exist_ok=True)
