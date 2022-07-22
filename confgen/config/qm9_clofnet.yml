@@ -13,7 +13,7 @@ train:
     - null
   anneal_power: 2.0
   save: true
-  save_path: /home/v-hezha1/saved/CG_V20210918
+  save_path: root/to/save
   resume_checkpoint: null
   resume_epoch: null
   log_interval: 400
@@ -38,8 +38,8 @@ train:
 
 
 test:
-  init_checkpoint: /casp/v-hezha1/workspace/EquiNODE-molecular/rebuttal4ICML/CG_V20210918/qm9/confgen/temp/ckpt
-  output_path: /casp/v-hezha1/workspace/EquiNODE-molecular/rebuttal4ICML/CG_V20210918/qm9/confgen/temp/generation
+  init_checkpoint: root/to/checkpoint
+  output_path: root/to/generation_files
   gen:
     steps_pos: 100
     step_lr_pos: 0.000002
@@ -50,7 +50,7 @@ test:
 
 
 data:
-  base_path: /casp/v-hezha1/workspace/EquiNODE-molecular/dataset/ConfGF_ICML2021
+  base_path: root/to/dataset
   dataset: qm9
   train_set: train_data_40k.pkl
   val_set: val_data_5k.pkl
