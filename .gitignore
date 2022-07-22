@@ -186,3 +186,5 @@ saved
 .amltignore
 amlt
 query_logs.py
+
+!confgen/confgf/dataset

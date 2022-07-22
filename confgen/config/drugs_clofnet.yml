@@ -1,0 +1,75 @@
+train:
+  batch_size: 128
+  seed: 2021
+  epochs: 400  
+  shuffle: true
+  resume_train: false
+  eval: true
+  num_workers: 3
+  gpus:
+    - 0
+    - null
+    - null
+    - null
+  anneal_power: 2.0
+  save: true
+  save_path: root/to/save
+  resume_checkpoint: null
+  resume_epoch: null
+  log_interval: 400
+  optimizer:
+    type: Adam
+    lr: 0.001
+    weight_decay: 0.0000
+    dropout: 0.0
+  scheduler:
+    type: plateau
+    factor: 0.6
+    patience: 10
+    min_lr: 1e-4
+  loss:
+    position: 1
+    distance: 0
+    curl: 0
+  wandb:
+    Enable: True
+    Project: Molecular-Generation
+  Name: clofnet4drugs
+    
+
+test:
+  init_checkpoint: root/to/checkpoint
+  output_path: root/to/generation_files
+  gen:
+    steps_pos: 100
+    step_lr_pos: 0.000002
+    clip: 1000
+    min_sigma: 0.0
+    verbose: 1
+    repeat: 3
+
+
+data:
+  base_path: root/to/dataset
+  dataset: drugs
+  train_set: train_data_39k.pkl
+  val_set: val_data_5k.pkl
+  test_set: test_data_200.pkl
+
+
+model:
+  hidden_dim: 288
+  num_convs: 4
+  sigma_begin: 10
+  sigma_end: 0.01
+  num_noise_level: 50
+  order: 3
+  mlp_act: relu
+  gnn_act: relu
+  cutoff: 10.0
+  short_cut: true
+  concat_hidden: false   
+  noise_type: rand
+  edge_encoder: mlp
+
+

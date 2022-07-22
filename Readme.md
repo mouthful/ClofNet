@@ -5,10 +5,23 @@ Reference implementation in PyTorch of the equivariant graph neural network (**C
 ## Run the code
 
 ### Build environment
+for newtonian system experiments
 ```   
 conda create -n clof python=3.9 -y
 conda activate clof
-conda install pytorch==1.9.0 torchvision==0.10.0 torchaudio==0.9.0 cudatoolkit=10.2 -c pytorch -y
+conda install -y -c pytorch pytorch=1.7.0 torchvision torchaudio cudatoolkit=10.2 -y
+```
+for conformation generation task
+```
+conda install -y -c rdkit rdkit==2020.03.2.0
+conda install -y scikit-learn pandas decorator ipython networkx tqdm matplotlib
+conda install -y -c conda-forge easydict
+pip install pyyaml
+pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-1.7.0+cu102.html
+pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-1.7.0+cu102.html
+pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-1.7.0+cu102.html
+pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.7.0+cu102.html
+pip install torch-geometric==1.6.3
 ```
 
 ### Newtonian many-body system
@@ -44,6 +57,27 @@ python -u main_newtonian.py --max_training_samples 3000 --norm_diff True --LR_de
 --data_mode dynamic_20body --epochs 600 --exp_name clof_vel_dynamic_20body --model clof_vel --n_layers 4 --data_root <root_of_data>
 ```
 
+### Conformation Generation
+Equilibrium conformation generation targets on predicting stable 3D structures from 2D molecular graphs. Following [ConfGF](https://arxiv.org/abs/2105.03902), we evaluate the proposed ClofNet on the GEOM-QM9 and GEOM-Drugs datasets ([Axelrod & Gomez-Bombarelli, 2020](https://arxiv.org/abs/2006.05531)) as well as the ISO17 dataset ([Sch¨utt et al., 2017](https://proceedings.neurips.cc/paper/2017/hash/303ed4c69846ab36c2904d3ba8573050-Abstract.html)). For the score-based generation framework, we build our algorithm based on the public codebase of [ConfGF](https://github.com/DeepGraphLearning/ConfGF). We sincerely thank their solid contribution for this field.
+
+#### Dataset 
+* **Offical Dataset**: The offical raw GEOM dataset is avaiable [[here]](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/JNGTDF).
+
+* **Preprocessed dataset**: We use the preprocessed datasets (GEOM, ISO17) published by ConfGF([[google drive folder]](https://drive.google.com/drive/folders/10dWaj5lyMY0VY4Zl0zDPCa69cuQUGb-6?usp=sharing)).
+
+#### Train
+```
+cd confgen
+python -u script/train.py --config_path ./config/qm9_clofnet.yml
+```
+#### Generation
+```
+python -u script/gen.py --config_path ./config/qm9_clofnet.yml --generator EquiGF --eval_epoch [epoch] --start 0 --end 100
+```
+#### Evaluation
+```
+python -u script/get_task1_results.py --input /root/to/generation --core 10 --threshold 0.5
+```
 ## Cite
 Please cite our paper if you use the model or this code in your own work:
 ```
