@@ -46,7 +46,7 @@ test:
     clip: 1000
     min_sigma: 0.0
     verbose: 1
-    repeat: 3
+    repeat: 2
 
 
 data:
