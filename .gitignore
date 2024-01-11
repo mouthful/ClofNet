@@ -188,3 +188,4 @@ amlt
 query_logs.py
 
 !confgen/confgf/dataset
+*_debug.yml

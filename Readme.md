@@ -7,7 +7,7 @@ Reference implementation in PyTorch of the equivariant graph neural network (**C
 ### Build environment
 for newtonian system experiments
 ```   
-conda create -n clof python=3.9 -y
+conda create -n clof python=3.7 -y
 conda activate clof
 conda install -y -c pytorch pytorch=1.7.0 torchvision torchaudio cudatoolkit=10.2 -y
 ```
@@ -16,11 +16,11 @@ for conformation generation task
 conda install -y -c rdkit rdkit==2020.03.2.0
 conda install -y scikit-learn pandas decorator ipython networkx tqdm matplotlib
 conda install -y -c conda-forge easydict
-pip install pyyaml
-pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-1.7.0+cu102.html
-pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-1.7.0+cu102.html
-pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-1.7.0+cu102.html
-pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-1.7.0+cu102.html
+pip install pyyaml wandb
+pip install torch-scatter==2.0.6 -f https://pytorch-geometric.com/whl/torch-1.7.0+cu102.html
+pip install torch-sparse==0.6.8 -f https://pytorch-geometric.com/whl/torch-1.7.0+cu102.html
+pip install torch-cluster==1.5.9 -f https://pytorch-geometric.com/whl/torch-1.7.0+cu102.html
+pip install torch-spline-conv==1.2.0 -f https://pytorch-geometric.com/whl/torch-1.7.0+cu102.html
 pip install torch-geometric==1.6.3
 ```
 
@@ -72,11 +72,12 @@ python -u script/train.py --config_path ./config/qm9_clofnet.yml
 ```
 #### Generation
 ```
-python -u script/gen.py --config_path ./config/qm9_clofnet.yml --generator EquiGF --eval_epoch [epoch] --start 0 --end 100
+python -u script/gen.py --config_path ./config/qm9_clofnet.yml --generator EquiGF --eval_epoch [epoch] --start 0 --end 1
 ```
 #### Evaluation
 ```
 python -u script/get_task1_results.py --input /root/to/generation --core 10 --threshold 0.5
+python -u script/get_task1_results.py --input /casp/v-hezha1/workspace/EquiNODE/code_publish/ClofNet/confgen/generation/clofnet4qm9/EquiGF_s0e1epoch398min_sig0.000repeat2.pkl --core 10 --threshold 0.5
 ```
 ## Cite
 Please cite our paper if you use the model or this code in your own work:
